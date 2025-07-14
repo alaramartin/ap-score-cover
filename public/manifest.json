@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "AP Score Cover",
+    "version": "1.0",
+    "description": "Covers up AP scores.",
+    "permissions": ["tabs", "scripting", "activeTab", "storage"],
+    "background": {
+        "service_worker": "/src/background.ts",
+        "type": "module"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "icon.png"
+    },
+    "host_permissions": ["<all_urls>"]
+}
