@@ -5,7 +5,7 @@
     "description": "Covers up AP scores.",
     "permissions": ["tabs", "scripting", "activeTab", "storage"],
     "background": {
-        "service_worker": "/src/background.ts",
+        "service_worker": "background.js",
         "type": "module"
     },
     "action": {
