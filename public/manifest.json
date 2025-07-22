@@ -1,15 +1,15 @@
 {
     "manifest_version": 3,
-    "name": "AP Score Cover",
+    "name": "Exam Score Cover",
     "version": "1.0",
-    "description": "Covers up AP scores.",
+    "description": "Covers up College Board exam scores, including AP and SAT.",
     "permissions": ["tabs", "scripting", "activeTab", "storage"],
     "background": {
         "service_worker": "background.js",
         "type": "module"
     },
     "action": {
-        "default_popup": "popup.html",
+        "default_popup": "./src/popup.html",
         "default_icon": "icon.png"
     },
     "host_permissions": ["<all_urls>"]
