@@ -5,11 +5,17 @@
 // when on site, listen to user clicks on scores, then activate another reveal(examName) function in content script
 
 
+
+// need to use chrome.storage if on/off toggle switch implemented
+
+
+
+
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Service worker activated!");
 });
 
-async function getTabID() {
+export async function getTabID() {
     let queryOptions = { active: true, lastFocusedWindow: true };
     // `tab` will either be a `tabs.Tab` instance or `undefined`.
     let [tab] = await chrome.tabs.query(queryOptions);
@@ -19,10 +25,9 @@ async function getTabID() {
     else return null;
 }
 
-async function getCurrentTabURL() {
+export async function getCurrentTabURL() {
     let tab = await getTabID()
     if (tab) {
-        console.log(tab.url)
         return tab.url?.toString();
     }
     return "";
@@ -30,64 +35,31 @@ async function getCurrentTabURL() {
 
 
 chrome.tabs.onActivated.addListener(async function() {
-    console.log("tab changed/activated")
-    // check if the tab url is the collegeboard ap website
-    // if so, call hide() function using chrome.scripting
-    
+    console.log("tab activated")
+        
     let currentURL = await getCurrentTabURL();
+    // check if the tab url is the collegeboard ap scores website
     if (currentURL == "https://apstudents.collegeboard.org/view-scores") {
-        // call chrome.scripting to hide the exam scores
-        console.log("yes");
-        hideScores()
+        console.log("user is on collegeboard website");
+        chrome.tabs.query({active: true, currentWindow: true},function() {
+            chrome.runtime.sendMessage("hide scores", (response) => {
+                if (response) console.log("done hiding");
+            })
+        });
     }
-    
 });
 
 chrome.tabs.onUpdated.addListener(async function() {
-    console.log("tab changed/activated")
-    // check if the tab url is the collegeboard ap website
-    // if so, call hide() function using chrome.scripting
-    let tab = await getTabID();
+    console.log("tab updated")
+
     let currentURL = await getCurrentTabURL();
+    // check if the tab url is the collegeboard ap scores website
     if (currentURL == "https://apstudents.collegeboard.org/view-scores") {
-        // call chrome.scripting to hide the exam scores (or chrome.message to the scripting file, and from there do chrome.scripting for a specific function)
-        console.log("yes");
-        if (tab && tab.id) {
-            chrome.scripting
-                .executeScript({
-                target : {tabId : tab.id},
-                func : hideScores,
-                })
-                .then(() => console.log("hid scores"));
-        }
-        else {
-            console.log("there was something wrong with tab/id")
-        }
+        console.log("user is on collegeboard website");
+        chrome.tabs.query({active: true, currentWindow: true},function() {
+            chrome.runtime.sendMessage("hide scores", (response) => {
+                if (response) console.log("done hiding");
+            })
+        });
     }
 });
-
-
-function hideScores() {
-    // hide all of the scores -- but save them so they can be reinstated later
-    // hide the class: class="apscores-card-body  display-flex"
-    // score is in class="sr-only"
-    function resetCards() {
-        let scoreCards = document.getElementsByClassName("apscores-card-body display-flex");
-        if (scoreCards.length > 0) {
-            console.log("scores: ", scoreCards[9]);
-            // Hide the scores
-            for (let card of scoreCards) {
-                (card as HTMLElement).style.display = 'none';
-            }
-        } else {
-            // wait and try again if elements not found
-            setTimeout(resetCards, 100);
-        }
-    }
-    
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', resetCards);
-    } else {
-        resetCards();
-    }
-}
