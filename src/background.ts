@@ -9,8 +9,6 @@
 // need to use chrome.storage if on/off toggle switch implemented
 
 
-
-
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Service worker activated!");
 });
@@ -34,32 +32,39 @@ export async function getCurrentTabURL() {
 }
 
 
-chrome.tabs.onActivated.addListener(async function() {
+chrome.tabs.onActivated.addListener(async function(activeInfo) {
     console.log("tab activated")
-        
-    let currentURL = await getCurrentTabURL();
-    // check if the tab url is the collegeboard ap scores website
-    if (currentURL == "https://apstudents.collegeboard.org/view-scores") {
-        console.log("user is on collegeboard website");
-        chrome.tabs.query({active: true, currentWindow: true},function() {
-            chrome.runtime.sendMessage("hide scores", (response) => {
-                if (response) console.log("done hiding");
-            })
-        });
-    }
+    
+    // get active tab info
+    chrome.tabs.get(activeInfo.tabId, (tab) => {
+        if (tab.url === "https://apstudents.collegeboard.org/view-scores") {
+            console.log("user is on collegeboard website");
+            // send message to content script and check for errors
+            chrome.tabs.sendMessage(activeInfo.tabId, {message: "hide scores"}, (response) => {
+                if (chrome.runtime.lastError) {
+                    console.log("Error:", chrome.runtime.lastError.message);
+                } else {
+                    console.log("Response:", response);
+                }
+            });
+        }
+    });
 });
 
-chrome.tabs.onUpdated.addListener(async function() {
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     console.log("tab updated")
 
-    let currentURL = await getCurrentTabURL();
-    // check if the tab url is the collegeboard ap scores website
-    if (currentURL == "https://apstudents.collegeboard.org/view-scores") {
+    // check if page is loaded
+    if (changeInfo.status === 'complete' && tab.url === "https://apstudents.collegeboard.org/view-scores") {
         console.log("user is on collegeboard website");
-        chrome.tabs.query({active: true, currentWindow: true},function() {
-            chrome.runtime.sendMessage("hide scores", (response) => {
-                if (response) console.log("done hiding");
-            })
+        
+        // send message to hide scores
+        chrome.tabs.sendMessage(tabId, {message: "hide scores"}, (response) => {
+            if (chrome.runtime.lastError) {
+                console.log("Error:", chrome.runtime.lastError.message);
+            } else {
+                console.log("Response:", response);
+            }
         });
     }
 });

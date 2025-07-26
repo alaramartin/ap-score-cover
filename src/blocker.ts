@@ -1,26 +1,38 @@
 // content script that modifies DOM to block or restore ap scores
 
-import {getTabID} from './background.ts'
+// import {getTabID} from './background.js'
 
-let tab:any;
+// let tab:any;
+
+console.log("hi")
+
+
 
 chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
+    console.log("got message");
     if (request.message === "hide scores") {
-        tab = await getTabID();
+        if (chrome.runtime.lastError) console.log("error")
+        // tab = await getTabID();
         // call chrome.scripting to hide the exam scores
         console.log("got tab id");
-        if (tab && tab.id) {
-            chrome.scripting
-                .executeScript({
-                target : {tabId : tab.id},
-                func : hideScores,
-                })
-                .then(() => console.log("hid scores"));
+        // if (tab && tab.id) {
+        //     chrome.scripting
+        //         .executeScript({
+        //         target : {tabId : tab.id},
+        //         func : hideScores,
+        //         })
+        //         .then(() => console.log("hid scores"));
+        hideScores();
+        console.log("hid scores");
         sendResponse(sender);
-        }
-        else {
-            console.log("there was something wrong with tab/id")
-        }
+        return true;
+        //}
+        // else {
+        //     console.log("there was something wrong with tab/id")
+        // }
+    }
+    else {
+        console.log("unknown message", request.message);
     }
     })
 
