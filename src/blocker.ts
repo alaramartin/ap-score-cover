@@ -8,7 +8,7 @@ console.log("hi")
 
 
 
-chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(async function(request, _sender, sendResponse) {
     console.log("got message");
     if (request.message === "hide scores") {
         if (chrome.runtime.lastError) console.log("error")
@@ -24,7 +24,7 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
         //         .then(() => console.log("hid scores"));
         hideScores();
         console.log("hid scores");
-        sendResponse(sender);
+        sendResponse({success: true});
         return true;
         //}
         // else {
