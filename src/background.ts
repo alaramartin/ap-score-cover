@@ -6,7 +6,7 @@
 
 
 
-// need to use chrome.storage if on/off toggle switch implemented
+// todo: need to use chrome.storage if on/off toggle switch implemented
 
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -14,9 +14,9 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 export async function getTabID() {
-    let queryOptions = { active: true, lastFocusedWindow: true };
+    const queryOptions = { active: true, lastFocusedWindow: true };
     // `tab` will either be a `tabs.Tab` instance or `undefined`.
-    let [tab] = await chrome.tabs.query(queryOptions);
+    const [tab] = await chrome.tabs.query(queryOptions);
     if (tab) {
         return tab;
     }
@@ -24,7 +24,7 @@ export async function getTabID() {
 }
 
 export async function getCurrentTabURL() {
-    let tab = await getTabID()
+    const tab = await getTabID()
     if (tab) {
         return tab.url?.toString();
     }
@@ -34,15 +34,7 @@ export async function getCurrentTabURL() {
 
 chrome.tabs.onActivated.addListener(async function(activeInfo) {
     console.log("tab activated")
-    // let tab = await getTabID();
-    // let tabID:number;
-    // if (tab && tab.id) {
-    //     tabID = tab.id;
-    // }
-    // else {
-    //     tabID = 0;
-    // }
-    
+
     // get active tab info
     chrome.tabs.get(activeInfo.tabId, (tab) => {
         if (tab.url === "https://apstudents.collegeboard.org/view-scores") {
@@ -65,7 +57,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     console.log("tab updated")
 
     // check if page is loaded
-    if (changeInfo.status === 'complete' && tab.url === "https://apstudents.collegeboard.org/view-scores") {
+    if ((changeInfo.status === 'loading' || changeInfo.status === 'complete') && tab.url === "https://apstudents.collegeboard.org/view-scores") {
         console.log("user is on collegeboard website");
         
         // send message to hide scores

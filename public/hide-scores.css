@@ -1,0 +1,9 @@
+/* hide scores immediately when page starts loading */
+.apscores-card-body.display-flex {
+    opacity: 0;
+    transition: opacity 300ms;
+}
+/* disable clicking for the element itself and its children */
+.apscores-card-body.display-flex > * {
+    pointer-events: none;
+}

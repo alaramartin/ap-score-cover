@@ -16,23 +16,28 @@ chrome.runtime.onMessage.addListener(async function(request, _sender, sendRespon
     }
     })
 
+
+// fixme: it also hides the body of the award but doesn't hide the header so it's really funny lmao
+
 function hideScores() {
     // hide the class: class="apscores-card-body  display-flex"
     function resetCards() {
-        let scoreCards = document.getElementsByClassName("apscores-card-body  display-flex");
+        const scoreCards = document.getElementsByClassName("apscores-card-body  display-flex");
         if (scoreCards.length > 0) {
-            for (let card of scoreCards) {
-                let scoreCard = card as HTMLElement;
-                // hide the scores
-                scoreCard.style.opacity = '0';
-                // make it clickable - add a transition for when it is clicked
-                scoreCard.style.transition = "opacity 100ms";
+            for (const card of scoreCards) {
+                const scoreCard = card as HTMLElement;
+                // just in case
+                scoreCard.classList.remove('revealed');
 
-                // make each card clickable: once clicked, opacity goes back to normal if opacity was 0
+                // make each card clickable: once clicked, css style shows it
                 scoreCard.addEventListener("click", () => {
-                    if (scoreCard.style.opacity == '0') {
-                        scoreCard.style.opacity = '1';
-                    }
+                    scoreCard.style.opacity = '1';
+                    scoreCard.style.pointerEvents = 'auto';
+                    // re-enable clicking on children
+                    const children = scoreCard.querySelectorAll('*');
+                    children.forEach(child => {
+                        (child as HTMLElement).style.pointerEvents = 'auto';
+                    });
                 });
             }
         }
