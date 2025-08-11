@@ -40,8 +40,6 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
         if (tab.url === "https://apstudents.collegeboard.org/view-scores") {
             console.log("user is on collegeboard website");
             // send message to content script and check for errors
-            // fixme: injecting too slowly (message/scripting doesn't make a difference) and first score is visible for a sec
-            // note: using chrome.scripting instead of sending message doesn't fix the issue. :(
             chrome.tabs.sendMessage(activeInfo.tabId, {message: "hide scores"}, (response) => {
                 if (chrome.runtime.lastError) {
                     console.log("Error:", chrome.runtime.lastError.message);

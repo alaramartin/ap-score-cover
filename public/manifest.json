@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Exam Score Cover",
     "version": "1.0",
-    "description": "Covers up College Board exam scores, including AP and SAT.",
+    "description": "Covers up College Board AP exam scores.",
     "permissions": ["tabs", "scripting", "activeTab", "storage"],
     "background": {
         "service_worker": "background.js",
@@ -18,6 +18,12 @@
         "js": ["contentScript.js"],
         "css": ["hide-scores.css"],
         "run_at": "document_start"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+        "resources": ["wahwahwah.mp3", "yippee.mp3"],
+        "matches": ["https://apstudents.collegeboard.org/*"]
         }
     ],
     "host_permissions": ["<all_urls>"]

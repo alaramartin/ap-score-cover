@@ -30,6 +30,7 @@ function hideScores() {
                 scoreCard.classList.remove('revealed');
 
                 // make each card clickable: once clicked, css style shows it
+                
                 scoreCard.addEventListener("click", () => {
                     scoreCard.style.opacity = '1';
                     scoreCard.style.pointerEvents = 'auto';
@@ -38,6 +39,17 @@ function hideScores() {
                     children.forEach(child => {
                         (child as HTMLElement).style.pointerEvents = 'auto';
                     });
+
+                    // if the score is less than a 5 play the "wah wah wah" sound
+                    const score = getScore(scoreCard);
+                    if (score != '5') {
+                        const wahWahWah = new Audio(chrome.runtime.getURL("wahwahwah.mp3"));
+                        wahWahWah.play();
+                    }
+                    else {
+                        const yippee = new Audio(chrome.runtime.getURL("yippee.mp3"));
+                        yippee.play();
+                    }
                 });
             }
         }
@@ -49,4 +61,16 @@ function hideScores() {
     resetCards();
 }
 
+function getScore(scoreCard:HTMLElement) {
+    // after "Your Score", number of score appears: 10th character in string
+    const text = scoreCard.textContent
+    let score = '0';
+    if (text) {
+        score = text.substring(10, 11)
+    }
+    console.log(score)
+    return score
+
+    // <div class="apscores-badge apscores-badge-score apscores-badge-score-5" style="pointer-events: auto;"><span class="sr-only" style="pointer-events: auto;">Your Score</span>5</div>
+}
 
