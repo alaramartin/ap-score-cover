@@ -9,7 +9,6 @@ chrome.runtime.onMessage.addListener(async function(request, _sender, sendRespon
         console.log("hid scores");
         sendResponse({success: true});
         return true;
-
     }
     else {
         console.log("unknown message", request.message);
@@ -26,11 +25,8 @@ function hideScores() {
         if (scoreCards.length > 0) {
             for (const card of scoreCards) {
                 const scoreCard = card as HTMLElement;
-                // just in case
-                scoreCard.classList.remove('revealed');
 
                 // make each card clickable: once clicked, css style shows it
-                
                 scoreCard.addEventListener("click", () => {
                     scoreCard.style.opacity = '1';
                     scoreCard.style.pointerEvents = 'auto';
@@ -40,16 +36,10 @@ function hideScores() {
                         (child as HTMLElement).style.pointerEvents = 'auto';
                     });
 
-                    // if the score is less than a 5 play the "wah wah wah" sound
                     const score = getScore(scoreCard);
-                    if (score != '5') {
-                        const wahWahWah = new Audio(chrome.runtime.getURL("wahwahwah.mp3"));
-                        wahWahWah.play();
-                    }
-                    else {
-                        const yippee = new Audio(chrome.runtime.getURL("yippee.mp3"));
-                        yippee.play();
-                    }
+                    // play a sound effect depending on the score
+                    playSound(score);
+                    playAnimation(score)
                 });
             }
         }
@@ -71,6 +61,47 @@ function getScore(scoreCard:HTMLElement) {
     console.log(score)
     return score
 
-    // <div class="apscores-badge apscores-badge-score apscores-badge-score-5" style="pointer-events: auto;"><span class="sr-only" style="pointer-events: auto;">Your Score</span>5</div>
 }
 
+// function getFileFromBase64()
+
+// todo: make sounds customizable by the user (user can upload any mp3 file) (but have defaults)
+// ^ create a folder user_sounds, name the sounds 1.mp3, 2.mp3, etc. check if the url exists (user_sounds/1.mp3 etc). if url doesn't exist, go to default sound for 1.mp3
+function playSound(score:string) {
+    if (score != '5') {
+        const wahWahWah = new Audio(chrome.runtime.getURL("default_sounds/wahwahwah.mp3"));
+        wahWahWah.play();
+    }
+    else {
+        const yippee = new Audio(chrome.runtime.getURL("default_sounds/yippee.mp3"));
+        yippee.play();
+    }
+}
+
+/* todo: make animations customizable and also not take up the whole screen */
+function playAnimation(score: string) {
+    if (score == '5') {
+        const animation = document.createElement('img');
+        animation.src = chrome.runtime.getURL("default_animations/happyhappyhappy.gif");
+        animation.style.cssText = `
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            opacity: 1; 
+            z-index: 10000; 
+            object-fit: cover; 
+            pointer-events: none;
+        `;
+        
+        // add to body
+        document.body.appendChild(animation);
+        // remove after 3 seconds
+        setTimeout(() => {
+            if (animation.parentNode) {
+                animation.parentNode.removeChild(animation);
+            }
+        }, 2000);
+    }
+}

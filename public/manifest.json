@@ -22,7 +22,7 @@
     ],
     "web_accessible_resources": [
         {
-        "resources": ["wahwahwah.mp3", "yippee.mp3"],
+        "resources": ["default_sounds/*.mp3", "default_animations/*.gif"],
         "matches": ["https://apstudents.collegeboard.org/*"]
         }
     ],

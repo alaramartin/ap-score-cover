@@ -1,13 +1,8 @@
 // listen for switching tab to collegeboard ap score website - https://apstudents.collegeboard.org/view-scores
-// activate content script using chrome.scripting
+// activate content script
 
-
-// when on site, listen to user clicks on scores, then activate another reveal(examName) function in content script
-
-
-
-// todo: need to use chrome.storage if on/off toggle switch implemented
-
+// todo: on/off toggle
+// todo: customizations
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Service worker activated!");
