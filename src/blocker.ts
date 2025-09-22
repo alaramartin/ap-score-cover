@@ -1,4 +1,5 @@
 // content script that modifies DOM to block or restore ap scores
+console.log("Content script loaded!");
 
 chrome.runtime.onMessage.addListener(async function(request, _sender, sendResponse) {
     console.log("got message");
@@ -17,6 +18,7 @@ chrome.runtime.onMessage.addListener(async function(request, _sender, sendRespon
 
 
 // fixme: it also hides the body of the award but doesn't hide the header so it's really funny lmao
+// fixme: clicking on it again makes it do the animation n stuff again
 
 function hideScores() {
     // hide the class: class="apscores-card-body  display-flex"
@@ -53,34 +55,67 @@ function hideScores() {
 
 function getScore(scoreCard:HTMLElement) {
     // after "Your Score", number of score appears: 10th character in string
-    const text = scoreCard.textContent
-    let score = '0';
+    const text = scoreCard.textContent;
+    let score = 0;
     if (text) {
-        score = text.substring(10, 11)
+        score = Number(text.substring(10, 11));
     }
-    console.log(score)
-    return score
-
+    console.log(score);
+    return score;
 }
 
-// function getFileFromBase64()
-
-// todo: make sounds customizable by the user (user can upload any mp3 file) (but have defaults)
-// ^ create a folder user_sounds, name the sounds 1.mp3, 2.mp3, etc. check if the url exists (user_sounds/1.mp3 etc). if url doesn't exist, go to default sound for 1.mp3
-function playSound(score:string) {
-    if (score != '5') {
-        const wahWahWah = new Audio(chrome.runtime.getURL("default_sounds/wahwahwah.mp3"));
-        wahWahWah.play();
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+    // remove the data URL thing (data:audio/mp3;base64,)
+    const base64String = base64.split(',')[1];
+    const binaryString = atob(base64String);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
     }
-    else {
-        const yippee = new Audio(chrome.runtime.getURL("default_sounds/yippee.mp3"));
-        yippee.play();
+    return bytes.buffer;
+}
+
+// play (customized or default) sounds upon score reveal
+async function playSound(score: number) {
+    try {
+        const result = await chrome.storage.local.get(["soundUploads"]);
+        let audioURL: string;
+        let audio: HTMLAudioElement;
+
+        if (result.soundUploads && result.soundUploads[score]) {
+            const base64Data = result.soundUploads[score].base64;
+            const audioData = base64ToArrayBuffer(base64Data);
+            // silly stuff to bypass collegeboard security protocol
+            const audioContext = new (
+                window.AudioContext ||
+                (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+            )();
+            const audioBuffer = await audioContext.decodeAudioData(audioData);
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            source.start();
+        }
+        else {
+            if (score != 5) {
+                audioURL = chrome.runtime.getURL("default_sounds/wahwahwah.mp3");
+            }
+            else {
+                audioURL = chrome.runtime.getURL("default_sounds/yippee.mp3");
+            }
+            audio = new Audio(audioURL);
+            await audio.play();
+        }
+    }
+    catch (err) {
+        console.log(err, "with playing audio");
     }
 }
 
 /* todo: make animations customizable and also not take up the whole screen */
-function playAnimation(score: string) {
-    if (score == '5') {
+function playAnimation(score: number) {
+    if (score == 5) {
         const animation = document.createElement('img');
         animation.src = chrome.runtime.getURL("default_animations/happyhappyhappy.gif");
         animation.style.cssText = `

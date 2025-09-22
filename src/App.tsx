@@ -45,7 +45,7 @@ function App() {
           setSoundFileUpload(newState);
           // save the state in chrome storage
           await chrome.storage.local.set({
-            ["soundUploads"]: newState,
+            soundUploads: newState,
           });
         } else {
           console.log("nothing uploaded");
