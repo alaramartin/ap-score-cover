@@ -2,26 +2,12 @@ import Header from "./components/Header.tsx";
 import FileUpload from "./components/FileUpload.tsx";
 import { useState, useEffect } from "react";
 
-/*
-chrome.storage.local.set({ key: value }).then(() => {
-  console.log("Value is set");
-});
-
-chrome.storage.local.get(["key"]).then((result) => {
-  console.log("Value is " + result.key);
-});
-
-
-
-todo: save the react state as well with chrome storage
-*/
-
 function App() {
   console.log("please");
 
   // initialize with the state in chrome.storage. if nothing in chrome.storage, then null
   const [soundFileUploads, setSoundFileUpload] = useState<
-    Record<number, string | null>
+    Record<number, { fileName: string; base64: string } | null>
   >({
     1: null,
     2: null,
@@ -40,20 +26,22 @@ function App() {
 
   const handleScoreUpload =
     (score: number) => async (e: React.ChangeEvent<HTMLInputElement>) => {
-      console.log("handled");
-
       try {
         // get the inputted file
         const file = e.target.files?.[0];
         console.log(file);
-        // setFile(file);
         // json stringify the audio file in base64
         if (file) {
           const fileBase64 = await getBase64(file);
           console.log(score);
 
+          const fileData = {
+            fileName: file.name,
+            base64: fileBase64,
+          };
+
           // save the state of the fileupload
-          const newState = { ...soundFileUploads, [score]: fileBase64 };
+          const newState = { ...soundFileUploads, [score]: fileData };
           setSoundFileUpload(newState);
           // save the state in chrome storage
           await chrome.storage.local.set({
@@ -99,9 +87,9 @@ function App() {
             <FileUpload onChange={handleScoreUpload(score)} score={score} />
             {soundFileUploads[score] && (
               <div
-                style={{ color: "green", fontSize: "12px", marginTop: "5px" }}
+                style={{ color: "black", fontSize: "12px", marginTop: "5px" }}
               >
-                Custom sound uploaded
+                Sound uploaded: {soundFileUploads[score].fileName}
               </div>
             )}
           </div>
