@@ -113,28 +113,38 @@ async function playSound(score: number) {
     }
 }
 
-/* todo: make animations customizable
-and also not take up the whole screen */
-function playAnimation(score: number) {
-    const animation = document.createElement('img');
-    animation.style.cssText = `
-            position: fixed; 
-            top: 0;
-            left: 0; 
-            width: 100vw; 
-            height: 100vh; 
-            opacity: 1; 
-            z-index: 10000; 
-            object-fit: cover; 
-            pointer-events: none;
-        `;
-    if (score == 5) {
-        animation.src = chrome.runtime.getURL("default_animations/happyhappyhappy.gif");
-    }
-    else {
-        animation.src = chrome.runtime.getURL("default_animations/sadcat.gif");
-    }
-    // add to body
+// play (customized or default) animation upon score reveal
+// todo: make it not take up the whole screen
+async function playAnimation(score: number) {
+    try {
+        const animation = document.createElement('img');
+        animation.style.cssText = `
+                position: fixed; 
+                top: 0;
+                left: 0; 
+                width: 100vw; 
+                height: 100vh; 
+                opacity: 1; 
+                z-index: 10000; 
+                object-fit: cover; 
+                pointer-events: none;
+            `;
+        
+        const result = await chrome.storage.local.get(["animationUploads"]);
+        if (result.animationUploads && result.animationUploads[score]) {
+            const base64Data = result.animationUploads[score].base64;
+            animation.src = base64Data;
+        }
+        else {
+            if (score == 5) {
+                animation.src = chrome.runtime.getURL("default_animations/happyhappyhappy.gif");
+            }
+            else {
+                animation.src = chrome.runtime.getURL("default_animations/sadcat.gif");
+            }
+        }
+        
+        // add to body
         document.body.appendChild(animation);
         // remove after 3 seconds
         setTimeout(() => {
@@ -142,4 +152,8 @@ function playAnimation(score: number) {
                 animation.parentNode.removeChild(animation);
             }
         }, 3000);
+    }
+    catch (err) {
+        console.log(err, "with playing animation");
+    }
 }

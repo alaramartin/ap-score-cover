@@ -10,7 +10,8 @@ interface Props {
 /* note: hide the input, customize the label
 keep track of file name AND base64 string in state/chromestorage
 */
-// todo: add remove button
+// todo: add remove (like, remove everything altogether) button
+// todo: add revert to default button
 function FileUpload({ onChange, score, inputType }: Props) {
     let acceptTypes: string;
     if (inputType === "sound") {
