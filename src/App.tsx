@@ -1,4 +1,6 @@
-import Header from './components/Header.tsx'
+import Header from "./components/Header.tsx";
+import FileUpload from "./components/FileUpload.tsx";
+import { useState, useEffect } from "react";
 
 /*
 chrome.storage.local.set({ key: value }).then(() => {
@@ -16,41 +18,62 @@ todo: save the react state as well with chrome storage
 
 function App() {
   console.log("please");
-  
-  const handleScoreUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("handled");
 
-    try {
-      // get the inputted file
-      const file = e.target.files?.[0];
-      console.log(file);
-      // json stringify the audio file in base64
-      if (file) {
-        const fileBase64 = await getBase64(file);
-        const score = e.target.id;
-        console.log(score);
-        // save it as its number (as the key) with chrome.storage.local
-        chrome.storage.local.set({ [score] : fileBase64 }).then(() => {
-          console.log("set");
-        });
-        
+  // initialize with the state in chrome.storage. if nothing in chrome.storage, then null
+  const [soundFileUploads, setSoundFileUpload] = useState<
+    Record<number, string | null>
+  >({
+    1: null,
+    2: null,
+    3: null,
+    4: null,
+    5: null,
+  });
+  // run when component first mounts
+  useEffect(() => {
+    chrome.storage.local.get(["soundUploads"]).then((result) => {
+      if (result.soundUploads) {
+        setSoundFileUpload(result.soundUploads);
       }
-      else {
-        console.log("nothing uploaded");
-      }
-    }
-    catch (error) {
-      console.error("failed to save sound", error);
-    }
-  }
+    });
+  }, []);
 
-  const resetSounds = async () => {
-    await chrome.storage.local.remove(['5', 'low']);
-    console.log("removed");
-  }
+  const handleScoreUpload =
+    (score: number) => async (e: React.ChangeEvent<HTMLInputElement>) => {
+      console.log("handled");
+
+      try {
+        // get the inputted file
+        const file = e.target.files?.[0];
+        console.log(file);
+        // setFile(file);
+        // json stringify the audio file in base64
+        if (file) {
+          const fileBase64 = await getBase64(file);
+          console.log(score);
+
+          // save the state of the fileupload
+          const newState = { ...soundFileUploads, [score]: fileBase64 };
+          setSoundFileUpload(newState);
+          // save the state in chrome storage
+          await chrome.storage.local.set({
+            ["soundUploads"]: newState,
+          });
+        } else {
+          console.log("nothing uploaded");
+        }
+      } catch (error) {
+        console.error("failed to save sound", error);
+      }
+    };
+
+  // const resetSounds = async () => {
+  //   await chrome.storage.local.remove(["uploads"]);
+  //   console.log("removed");
+  // };
 
   // convert a file to a base64 string, returns a promise
-  async function getBase64(file:File): Promise<string> {
+  async function getBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -58,29 +81,34 @@ function App() {
         resolve(reader.result as string);
       };
       reader.onerror = function (error) {
-        console.log('Error: ', error);
+        console.log("Error: ", error);
         reject(error);
       };
     });
   }
 
-  return(
-    <div>
+  const scores = [1, 2, 3, 4, 5];
+
+  return (
+    <>
       <Header />
-      <div style={{ padding: '10px' }}>
+      <div style={{ padding: "10px" }}>
         <h3>Custom Sounds</h3>
-        <div>
-          <label>Sound for scores 1-4: </label>
-          <input type="file" id="low" accept=".mp3,.wav,.ogg" onChange={handleScoreUpload} />
-        </div>
-        <div>
-          <label>Sound for score 5: </label>
-          <input type="file" id="5" accept=".mp3,.wav,.ogg" onChange={handleScoreUpload} />
-        </div>
-        <button onClick={resetSounds}>Reset to Default</button>
+        {scores.map((score) => (
+          <div key={score} style={{ marginBottom: "10px" }}>
+            <FileUpload onChange={handleScoreUpload(score)} score={score} />
+            {soundFileUploads[score] && (
+              <div
+                style={{ color: "green", fontSize: "12px", marginTop: "5px" }}
+              >
+                Custom sound uploaded
+              </div>
+            )}
+          </div>
+        ))}
       </div>
-    </div>
+    </>
   );
 }
 
-export default App
+export default App;

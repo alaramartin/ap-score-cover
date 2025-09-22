@@ -1,11 +1,10 @@
-
 function Header() {
-    return(
-        <header>
-            <h1>CollegeBoard Score Cover</h1>
-            <hr></hr>
-        </header>
-    );
+  return (
+    <header>
+      <h1>AP Score Cover</h1>
+      <hr></hr>
+    </header>
+  );
 }
 
-export default Header
+export default Header;
