@@ -113,12 +113,11 @@ async function playSound(score: number) {
     }
 }
 
-/* todo: make animations customizable and also not take up the whole screen */
+/* todo: make animations customizable
+and also not take up the whole screen */
 function playAnimation(score: number) {
-    if (score == 5) {
-        const animation = document.createElement('img');
-        animation.src = chrome.runtime.getURL("default_animations/happyhappyhappy.gif");
-        animation.style.cssText = `
+    const animation = document.createElement('img');
+    animation.style.cssText = `
             position: fixed; 
             top: 0;
             left: 0; 
@@ -129,14 +128,18 @@ function playAnimation(score: number) {
             object-fit: cover; 
             pointer-events: none;
         `;
-        
-        // add to body
+    if (score == 5) {
+        animation.src = chrome.runtime.getURL("default_animations/happyhappyhappy.gif");
+    }
+    else {
+        animation.src = chrome.runtime.getURL("default_animations/sadcat.gif");
+    }
+    // add to body
         document.body.appendChild(animation);
         // remove after 3 seconds
         setTimeout(() => {
             if (animation.parentNode) {
                 animation.parentNode.removeChild(animation);
             }
-        }, 2000);
-    }
+        }, 3000);
 }
