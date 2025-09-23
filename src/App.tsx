@@ -3,11 +3,48 @@ import FileUpload from "./components/FileUpload.tsx";
 import { useState, useEffect } from "react";
 
 function App() {
-    console.log("please");
-
     // initialize with the state in chrome.storage. if nothing in chrome.storage, then null
+    // todo: refactor everythign to jsut this
+    // const newState = {
+    //     ...oldUploads,
+    //     [score]: {
+    //         ...oldUploads[score], // Keep existing properties
+    //         removed: true        // Only update this property
+    //     }
+    // };
+    // const [fileUploads, setFileUpload] = useState<
+    //     Record<
+    //         number,
+    //         {
+    //             soundFileName: string;
+    //             soundBase64: string;
+    //             soundRemoved: boolean;
+    //             animFileName: string;
+    //             animBase64: string;
+    //             animRemoved: boolean;
+    //         } | null
+    //     >
+    // >({
+    //     1: null,
+    //     2: null,
+    //     3: null,
+    //     4: null,
+    //     5: null,
+    // });
+    // // run when component first mounts
+    // useEffect(() => {
+    //     chrome.storage.local.get(["fileUploads"]).then((result) => {
+    //         if (result.fileUploads) {
+    //             setSoundFileUpload(result.fileUploads);
+    //         }
+    //     });
+    // }, []);
+
     const [soundFileUploads, setSoundFileUpload] = useState<
-        Record<number, { fileName: string; base64: string } | null>
+        Record<
+            number,
+            { fileName: string; base64: string; removed: boolean } | null
+        >
     >({
         1: null,
         2: null,
@@ -26,7 +63,10 @@ function App() {
 
     // initialize with the state in chrome.storage. if nothing in chrome.storage, then null
     const [animationFileUploads, setAnimationFileUpload] = useState<
-        Record<number, { fileName: string; base64: string } | null>
+        Record<
+            number,
+            { fileName: string; base64: string; removed: boolean } | null
+        >
     >({
         1: null,
         2: null,
@@ -73,6 +113,7 @@ function App() {
                     const fileData = {
                         fileName: file.name,
                         base64: fileBase64,
+                        removed: false,
                     };
 
                     // save the state of the fileupload
@@ -90,9 +131,77 @@ function App() {
             }
         };
 
-    // const resetSounds = async () => {
-    //   await chrome.storage.local.remove(["uploads"]);
-    //   console.log("removed");
+    const handleRevertToDefault =
+        (score: number, inputType: string) => async () => {
+            try {
+                // fixme: below stuff will all be removed/made more efficient when code is refactored
+                let oldUploads;
+                let setFileUpload;
+                let chromeStorageKey;
+                if (inputType === "sound") {
+                    oldUploads = soundFileUploads;
+                    setFileUpload = setSoundFileUpload;
+                    chromeStorageKey = "soundUploads";
+                } else if (inputType === "animation") {
+                    oldUploads = animationFileUploads;
+                    setFileUpload = setAnimationFileUpload;
+                    chromeStorageKey = "animationUploads";
+                } else {
+                    throw new Error("unknown input type");
+                }
+
+                const fileData = null;
+
+                // save the state of the fileupload
+                const newState = { ...oldUploads, [score]: fileData };
+                setFileUpload(newState);
+                // save the state in chrome storage
+                await chrome.storage.local.set({
+                    [chromeStorageKey]: newState,
+                });
+            } catch (error) {
+                console.error("failed to save file", error);
+            }
+        };
+
+    const handleRemove = (score: number, inputType: string) => async () => {
+        try {
+            // fixme: below stuff will all be removed/made more efficient when code is refactored
+            let oldUploads;
+            let setFileUpload;
+            let chromeStorageKey;
+            if (inputType === "sound") {
+                oldUploads = soundFileUploads;
+                setFileUpload = setSoundFileUpload;
+                chromeStorageKey = "soundUploads";
+            } else if (inputType === "animation") {
+                oldUploads = animationFileUploads;
+                setFileUpload = setAnimationFileUpload;
+                chromeStorageKey = "animationUploads";
+            } else {
+                throw new Error("unknown input type");
+            }
+
+            const fileData = null;
+
+            // save the state of the fileupload
+            const newState = { ...oldUploads, [score]: fileData };
+            setFileUpload(newState);
+            // save the state in chrome storage
+            await chrome.storage.local.set({
+                [chromeStorageKey]: newState,
+            });
+        } catch (error) {
+            console.error("failed to save file", error);
+        }
+    };
+
+    // const resetAll = async () => {
+    //     await chrome.storage.local.remove(["soundUploads"]);
+    //     await chrome.storage.local.remove(["animationUploads"]);
+    //     // todo: do the state resetting after refactoring code because it'll be easier
+    //     const resetState = ;
+    //     console.log("removed");
     // };
 
     // convert a file to a base64 string, returns a promise
@@ -121,6 +230,8 @@ function App() {
                     <div key={score} style={{ marginBottom: "10px" }}>
                         <FileUpload
                             onChange={handleFileUpload(score, "sound")}
+                            onRevert={handleRevertToDefault(score, "sound")}
+                            onRemove={handleRemove(score, "sound")}
                             score={score}
                             inputType="sound"
                         />
@@ -154,6 +265,8 @@ function App() {
                     <div key={score} style={{ marginBottom: "10px" }}>
                         <FileUpload
                             onChange={handleFileUpload(score, "animation")}
+                            onRevert={handleRevertToDefault(score, "animation")}
+                            onRemove={handleRemove(score, "animation")}
                             score={score}
                             inputType="animation"
                         />

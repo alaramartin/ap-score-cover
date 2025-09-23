@@ -14,7 +14,7 @@ chrome.runtime.onMessage.addListener(async function(request, _sender, sendRespon
     else {
         console.log("unknown message", request.message);
     }
-    })
+});
 
 
 // fixme: it also hides the body of the award but doesn't hide the header so it's really funny lmao
@@ -76,6 +76,7 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
     return bytes.buffer;
 }
 
+// todo: add checks for soundUploads[score].removed (if removed, play no sound)
 // play (customized or default) sounds upon score reveal
 async function playSound(score: number) {
     try {
@@ -115,6 +116,7 @@ async function playSound(score: number) {
 
 // play (customized or default) animation upon score reveal
 // todo: make it not take up the whole screen
+// todo: add checks for animationUploads[score].removed (if removed, play no sound)
 async function playAnimation(score: number) {
     try {
         const animation = document.createElement('img');

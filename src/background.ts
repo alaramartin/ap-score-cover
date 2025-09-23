@@ -1,9 +1,6 @@
 // listen for switching tab to collegeboard ap score website - https://apstudents.collegeboard.org/view-scores
 // activate content script
 
-// todo: on/off toggle
-// todo: customizations
-
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Service worker activated!");
 });
