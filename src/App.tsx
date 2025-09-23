@@ -4,46 +4,21 @@ import { useState, useEffect } from "react";
 
 function App() {
     // initialize with the state in chrome.storage. if nothing in chrome.storage, then null
-    // todo: refactor everythign to jsut this
-    // const newState = {
-    //     ...oldUploads,
-    //     [score]: {
-    //         ...oldUploads[score], // Keep existing properties
-    //         removed: true        // Only update this property
-    //     }
-    // };
-    // const [fileUploads, setFileUpload] = useState<
-    //     Record<
-    //         number,
-    //         {
-    //             soundFileName: string;
-    //             soundBase64: string;
-    //             soundRemoved: boolean;
-    //             animFileName: string;
-    //             animBase64: string;
-    //             animRemoved: boolean;
-    //         } | null
-    //     >
-    // >({
-    //     1: null,
-    //     2: null,
-    //     3: null,
-    //     4: null,
-    //     5: null,
-    // });
-    // // run when component first mounts
-    // useEffect(() => {
-    //     chrome.storage.local.get(["fileUploads"]).then((result) => {
-    //         if (result.fileUploads) {
-    //             setSoundFileUpload(result.fileUploads);
-    //         }
-    //     });
-    // }, []);
-
-    const [soundFileUploads, setSoundFileUpload] = useState<
+    const [fileUploads, setFileUpload] = useState<
         Record<
             number,
-            { fileName: string; base64: string; removed: boolean } | null
+            {
+                sound: {
+                    fileName: string;
+                    base64: string;
+                    removed: boolean;
+                };
+                anim: {
+                    fileName: string;
+                    base64: string;
+                    removed: boolean;
+                };
+            } | null
         >
     >({
         1: null,
@@ -54,31 +29,9 @@ function App() {
     });
     // run when component first mounts
     useEffect(() => {
-        chrome.storage.local.get(["soundUploads"]).then((result) => {
-            if (result.soundUploads) {
-                setSoundFileUpload(result.soundUploads);
-            }
-        });
-    }, []);
-
-    // initialize with the state in chrome.storage. if nothing in chrome.storage, then null
-    const [animationFileUploads, setAnimationFileUpload] = useState<
-        Record<
-            number,
-            { fileName: string; base64: string; removed: boolean } | null
-        >
-    >({
-        1: null,
-        2: null,
-        3: null,
-        4: null,
-        5: null,
-    });
-    // run when component first mounts
-    useEffect(() => {
-        chrome.storage.local.get(["animationUploads"]).then((result) => {
-            if (result.animationUploads) {
-                setAnimationFileUpload(result.animationUploads);
+        chrome.storage.local.get(["fileUploads"]).then((result) => {
+            if (result.fileUploads) {
+                setFileUpload(result.fileUploads);
             }
         });
     }, []);
@@ -87,21 +40,6 @@ function App() {
         (score: number, inputType: string) =>
         async (e: React.ChangeEvent<HTMLInputElement>) => {
             try {
-                let oldUploads;
-                let setFileUpload;
-                let chromeStorageKey;
-                if (inputType === "sound") {
-                    oldUploads = soundFileUploads;
-                    setFileUpload = setSoundFileUpload;
-                    chromeStorageKey = "soundUploads";
-                } else if (inputType === "animation") {
-                    oldUploads = animationFileUploads;
-                    setFileUpload = setAnimationFileUpload;
-                    chromeStorageKey = "animationUploads";
-                } else {
-                    throw new Error("unknown input type");
-                }
-
                 // get the inputted file
                 const file = e.target.files?.[0];
                 console.log(file);
@@ -110,18 +48,48 @@ function App() {
                     const fileBase64 = await getBase64(file);
                     console.log(score);
 
-                    const fileData = {
-                        fileName: file.name,
-                        base64: fileBase64,
+                    const existingData = fileUploads[score];
+                    const currentSound = existingData?.sound || {
+                        fileName: "",
+                        base64: "",
+                        removed: false,
+                    };
+                    const currentAnim = existingData?.anim || {
+                        fileName: "",
+                        base64: "",
                         removed: false,
                     };
 
+                    let fileData;
+                    if (inputType === "sound") {
+                        fileData = {
+                            sound: {
+                                fileName: file.name,
+                                base64: fileBase64,
+                                removed: false,
+                            },
+                            anim: currentAnim,
+                        };
+                    } else {
+                        fileData = {
+                            sound: currentSound,
+                            anim: {
+                                fileName: file.name,
+                                base64: fileBase64,
+                                removed: false,
+                            },
+                        };
+                    }
+
                     // save the state of the fileupload
-                    const newState = { ...oldUploads, [score]: fileData };
+                    const newState = {
+                        ...fileUploads,
+                        [score]: fileData,
+                    };
                     setFileUpload(newState);
                     // save the state in chrome storage
                     await chrome.storage.local.set({
-                        [chromeStorageKey]: newState,
+                        fileUploads: newState,
                     });
                 } else {
                     console.log("nothing uploaded");
@@ -134,30 +102,44 @@ function App() {
     const handleRevertToDefault =
         (score: number, inputType: string) => async () => {
             try {
-                // fixme: below stuff will all be removed/made more efficient when code is refactored
-                let oldUploads;
-                let setFileUpload;
-                let chromeStorageKey;
+                const existingData = fileUploads[score];
+                const currentSound = existingData?.sound || {
+                    fileName: "",
+                    base64: "",
+                    removed: false,
+                };
+                const currentAnim = existingData?.anim || {
+                    fileName: "",
+                    base64: "",
+                    removed: false,
+                };
+
+                let fileData;
                 if (inputType === "sound") {
-                    oldUploads = soundFileUploads;
-                    setFileUpload = setSoundFileUpload;
-                    chromeStorageKey = "soundUploads";
-                } else if (inputType === "animation") {
-                    oldUploads = animationFileUploads;
-                    setFileUpload = setAnimationFileUpload;
-                    chromeStorageKey = "animationUploads";
+                    fileData = {
+                        sound: {
+                            fileName: "",
+                            base64: "",
+                            removed: false,
+                        },
+                        anim: currentAnim,
+                    };
                 } else {
-                    throw new Error("unknown input type");
+                    fileData = {
+                        sound: currentSound,
+                        anim: {
+                            fileName: "",
+                            base64: "",
+                            removed: false,
+                        },
+                    };
                 }
-
-                const fileData = null;
-
                 // save the state of the fileupload
-                const newState = { ...oldUploads, [score]: fileData };
+                const newState = { ...fileUploads, [score]: fileData };
                 setFileUpload(newState);
                 // save the state in chrome storage
                 await chrome.storage.local.set({
-                    [chromeStorageKey]: newState,
+                    fileUploads: newState,
                 });
             } catch (error) {
                 console.error("failed to save file", error);
@@ -166,30 +148,45 @@ function App() {
 
     const handleRemove = (score: number, inputType: string) => async () => {
         try {
-            // fixme: below stuff will all be removed/made more efficient when code is refactored
-            let oldUploads;
-            let setFileUpload;
-            let chromeStorageKey;
+            const existingData = fileUploads[score];
+            const currentSound = existingData?.sound || {
+                fileName: "",
+                base64: "",
+                removed: false,
+            };
+            const currentAnim = existingData?.anim || {
+                fileName: "",
+                base64: "",
+                removed: false,
+            };
+
+            let fileData;
             if (inputType === "sound") {
-                oldUploads = soundFileUploads;
-                setFileUpload = setSoundFileUpload;
-                chromeStorageKey = "soundUploads";
-            } else if (inputType === "animation") {
-                oldUploads = animationFileUploads;
-                setFileUpload = setAnimationFileUpload;
-                chromeStorageKey = "animationUploads";
+                fileData = {
+                    sound: {
+                        fileName: currentSound.fileName,
+                        base64: currentSound.base64,
+                        removed: true,
+                    },
+                    anim: currentAnim,
+                };
             } else {
-                throw new Error("unknown input type");
+                fileData = {
+                    sound: currentSound,
+                    anim: {
+                        fileName: currentAnim.fileName,
+                        base64: currentAnim.base64,
+                        removed: true,
+                    },
+                };
             }
 
-            const fileData = null;
-
             // save the state of the fileupload
-            const newState = { ...oldUploads, [score]: fileData };
+            const newState = { ...fileUploads, [score]: fileData };
             setFileUpload(newState);
             // save the state in chrome storage
             await chrome.storage.local.set({
-                [chromeStorageKey]: newState,
+                fileUploads: newState,
             });
         } catch (error) {
             console.error("failed to save file", error);
@@ -235,7 +232,7 @@ function App() {
                             score={score}
                             inputType="sound"
                         />
-                        {soundFileUploads[score] && (
+                        {fileUploads[score]?.sound && (
                             <div
                                 style={{
                                     color: "black",
@@ -244,10 +241,10 @@ function App() {
                                 }}
                             >
                                 Sound uploaded for score {score}:{" "}
-                                {soundFileUploads[score].fileName}
+                                {fileUploads[score].sound.fileName}
                             </div>
                         )}
-                        {!soundFileUploads[score] && (
+                        {!fileUploads[score]?.sound && (
                             <div
                                 style={{
                                     color: "black",
@@ -261,6 +258,8 @@ function App() {
                         )}
                     </div>
                 ))}
+
+                <h3>Custom Animations</h3>
                 {scores.map((score) => (
                     <div key={score} style={{ marginBottom: "10px" }}>
                         <FileUpload
@@ -270,7 +269,7 @@ function App() {
                             score={score}
                             inputType="animation"
                         />
-                        {animationFileUploads[score] && (
+                        {fileUploads[score]?.anim && (
                             <div
                                 style={{
                                     color: "black",
@@ -279,10 +278,10 @@ function App() {
                                 }}
                             >
                                 Animation uploaded for score {score}:{" "}
-                                {animationFileUploads[score].fileName}
+                                {fileUploads[score].anim.fileName}
                             </div>
                         )}
-                        {!animationFileUploads[score] && (
+                        {!fileUploads[score]?.anim && (
                             <div
                                 style={{
                                     color: "black",
