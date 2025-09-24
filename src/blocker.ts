@@ -76,7 +76,6 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
     return bytes.buffer;
 }
 
-// todo: add checks for soundUploads[score].removed (if removed, play no sound)
 // play (customized or default) sounds upon score reveal
 async function playSound(score: number) {
     try {
@@ -85,6 +84,9 @@ async function playSound(score: number) {
         let audio: HTMLAudioElement;
 
         if (result.fileUploads && result.fileUploads[score]?.sound) {
+            if (result.fileUploads[score].sound.removed) {
+                return;
+            }
             const base64Data = result.fileUploads[score].sound.base64;
             const audioData = base64ToArrayBuffer(base64Data);
             // silly stuff to bypass collegeboard security protocol
@@ -115,8 +117,6 @@ async function playSound(score: number) {
 }
 
 // play (customized or default) animation upon score reveal
-// todo: make it not take up the whole screen
-// todo: add checks for animationUploads[score].removed (if removed, play no sound)
 async function playAnimation(score: number) {
     try {
         const animation = document.createElement('img');
@@ -134,6 +134,9 @@ async function playAnimation(score: number) {
         
         const result = await chrome.storage.local.get(["fileUploads"]);
         if (result.fileUploads && result.fileUploads[score]?.anim) {
+            if (result.fileUploads[score].anim.removed) {
+                return;
+            }
             const base64Data = result.fileUploads[score].anim.base64;
             animation.src = base64Data;
         }

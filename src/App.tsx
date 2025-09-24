@@ -48,17 +48,7 @@ function App() {
                     const fileBase64 = await getBase64(file);
                     console.log(score);
 
-                    const existingData = fileUploads[score];
-                    const currentSound = existingData?.sound || {
-                        fileName: "",
-                        base64: "",
-                        removed: false,
-                    };
-                    const currentAnim = existingData?.anim || {
-                        fileName: "",
-                        base64: "",
-                        removed: false,
-                    };
+                    const [currentSound, currentAnim] = getCurrentData(score);
 
                     let fileData;
                     if (inputType === "sound") {
@@ -102,17 +92,7 @@ function App() {
     const handleRevertToDefault =
         (score: number, inputType: string) => async () => {
             try {
-                const existingData = fileUploads[score];
-                const currentSound = existingData?.sound || {
-                    fileName: "",
-                    base64: "",
-                    removed: false,
-                };
-                const currentAnim = existingData?.anim || {
-                    fileName: "",
-                    base64: "",
-                    removed: false,
-                };
+                const [currentSound, currentAnim] = getCurrentData(score);
 
                 let fileData;
                 if (inputType === "sound") {
@@ -148,24 +128,14 @@ function App() {
 
     const handleRemove = (score: number, inputType: string) => async () => {
         try {
-            const existingData = fileUploads[score];
-            const currentSound = existingData?.sound || {
-                fileName: "",
-                base64: "",
-                removed: false,
-            };
-            const currentAnim = existingData?.anim || {
-                fileName: "",
-                base64: "",
-                removed: false,
-            };
+            const [currentSound, currentAnim] = getCurrentData(score);
 
             let fileData;
             if (inputType === "sound") {
                 fileData = {
                     sound: {
-                        fileName: currentSound.fileName,
-                        base64: currentSound.base64,
+                        fileName: "",
+                        base64: "",
                         removed: true,
                     },
                     anim: currentAnim,
@@ -174,8 +144,8 @@ function App() {
                 fileData = {
                     sound: currentSound,
                     anim: {
-                        fileName: currentAnim.fileName,
-                        base64: currentAnim.base64,
+                        fileName: "",
+                        base64: "",
                         removed: true,
                     },
                 };
@@ -193,13 +163,22 @@ function App() {
         }
     };
 
-    // const resetAll = async () => {
-    //     await chrome.storage.local.remove(["soundUploads"]);
-    //     await chrome.storage.local.remove(["animationUploads"]);
-    //     // todo: do the state resetting after refactoring code because it'll be easier
-    //     const resetState = ;
-    //     console.log("removed");
-    // };
+    const resetAll = async (): Promise<void> => {
+        try {
+            await chrome.storage.local.remove(["fileUploads"]);
+            setFileUpload({
+                1: null,
+                2: null,
+                3: null,
+                4: null,
+                5: null,
+            });
+
+            console.log("reset");
+        } catch (error) {
+            console.error(error, "with resetting");
+        }
+    };
 
     // convert a file to a base64 string, returns a promise
     async function getBase64(file: File): Promise<string> {
@@ -216,6 +195,21 @@ function App() {
         });
     }
 
+    function getCurrentData(score: number) {
+        const existingData = fileUploads[score];
+        const currentSound = existingData?.sound || {
+            fileName: "",
+            base64: "",
+            removed: false,
+        };
+        const currentAnim = existingData?.anim || {
+            fileName: "",
+            base64: "",
+            removed: false,
+        };
+        return [currentSound, currentAnim];
+    }
+
     const scores = [1, 2, 3, 4, 5];
 
     return (
@@ -227,35 +221,49 @@ function App() {
                     <div key={score} style={{ marginBottom: "10px" }}>
                         <FileUpload
                             onChange={handleFileUpload(score, "sound")}
-                            onRevert={handleRevertToDefault(score, "sound")}
-                            onRemove={handleRemove(score, "sound")}
                             score={score}
                             inputType="sound"
                         />
-                        {fileUploads[score]?.sound && (
-                            <div
-                                style={{
-                                    color: "black",
-                                    fontSize: "12px",
-                                    marginTop: "5px",
-                                }}
+                        {fileUploads[score]?.sound?.fileName && (
+                            <button
+                                onClick={handleRevertToDefault(score, "sound")}
                             >
-                                Sound uploaded for score {score}:{" "}
-                                {fileUploads[score].sound.fileName}
-                            </div>
+                                Revert to default for score {score}?
+                            </button>
                         )}
-                        {!fileUploads[score]?.sound && (
-                            <div
-                                style={{
-                                    color: "black",
-                                    fontSize: "12px",
-                                    marginTop: "5px",
-                                }}
+                        {!fileUploads[score]?.sound?.removed ? (
+                            <button onClick={handleRemove(score, "sound")}>
+                                Remove all sounds for score {score}?
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleRevertToDefault(score, "sound")}
                             >
-                                No sound uploaded for score {score}, resort to
-                                default
-                            </div>
+                                Add default sound back for score {score}?
+                            </button>
                         )}
+                        <div
+                            style={{
+                                color: "black",
+                                fontSize: "12px",
+                                marginTop: "5px",
+                            }}
+                        >
+                            {fileUploads[score]?.sound?.fileName &&
+                                !fileUploads[score]?.sound?.removed && (
+                                    <span>
+                                        Sound uploaded for score {score}:{" "}
+                                        {fileUploads[score].sound.fileName}
+                                    </span>
+                                )}
+                            {!fileUploads[score]?.sound?.fileName &&
+                                !fileUploads[score]?.sound?.removed && (
+                                    <span>
+                                        No sound uploaded for score {score},
+                                        resort to default
+                                    </span>
+                                )}
+                        </div>
                     </div>
                 ))}
 
@@ -264,37 +272,60 @@ function App() {
                     <div key={score} style={{ marginBottom: "10px" }}>
                         <FileUpload
                             onChange={handleFileUpload(score, "animation")}
-                            onRevert={handleRevertToDefault(score, "animation")}
-                            onRemove={handleRemove(score, "animation")}
                             score={score}
                             inputType="animation"
                         />
-                        {fileUploads[score]?.anim && (
-                            <div
-                                style={{
-                                    color: "black",
-                                    fontSize: "12px",
-                                    marginTop: "5px",
-                                }}
+                        {fileUploads[score]?.anim?.fileName && (
+                            <button
+                                onClick={handleRevertToDefault(
+                                    score,
+                                    "animation"
+                                )}
                             >
-                                Animation uploaded for score {score}:{" "}
-                                {fileUploads[score].anim.fileName}
-                            </div>
+                                Revert to default for score {score}?
+                            </button>
                         )}
-                        {!fileUploads[score]?.anim && (
-                            <div
-                                style={{
-                                    color: "black",
-                                    fontSize: "12px",
-                                    marginTop: "5px",
-                                }}
+                        {!fileUploads[score]?.anim?.removed ? (
+                            <button onClick={handleRemove(score, "animation")}>
+                                Remove all animations for score {score}?
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleRevertToDefault(
+                                    score,
+                                    "animation"
+                                )}
                             >
-                                No animation uploaded for score {score}, resort
-                                to default
-                            </div>
+                                Add default animation back for score {score}?
+                            </button>
                         )}
+                        <div
+                            style={{
+                                color: "black",
+                                fontSize: "12px",
+                                marginTop: "5px",
+                            }}
+                        >
+                            {fileUploads[score]?.anim?.fileName &&
+                                !fileUploads[score]?.anim?.removed && (
+                                    <span>
+                                        Animation uploaded for score {score}:{" "}
+                                        {fileUploads[score].anim.fileName}
+                                    </span>
+                                )}
+                            {!fileUploads[score]?.anim?.fileName &&
+                                !fileUploads[score]?.anim?.removed && (
+                                    <span>
+                                        No animation uploaded for score {score},
+                                        resort to default
+                                    </span>
+                                )}
+                        </div>
                     </div>
                 ))}
+                <button onClick={resetAll}>
+                    Reset All (Animations And Sounds) to default?
+                </button>
             </div>
         </>
     );
