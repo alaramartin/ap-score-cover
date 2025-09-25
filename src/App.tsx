@@ -1,5 +1,5 @@
 import Header from "./components/Header.tsx";
-import FileUpload from "./components/FileUpload.tsx";
+import ScoreCard from "./components/ScoreCard.tsx";
 import { useState, useEffect } from "react";
 
 function App() {
@@ -210,7 +210,7 @@ function App() {
         return [currentSound, currentAnim];
     }
 
-    const scores = [1, 2, 3, 4, 5];
+    const scores = [5, 4, 3, 2, 1];
 
     return (
         <>
@@ -218,110 +218,26 @@ function App() {
             <div style={{ padding: "10px" }}>
                 <h3>Custom Sounds</h3>
                 {scores.map((score) => (
-                    <div key={score} style={{ marginBottom: "10px" }}>
-                        <FileUpload
-                            onChange={handleFileUpload(score, "sound")}
-                            score={score}
-                            inputType="sound"
-                        />
-                        {fileUploads[score]?.sound?.fileName && (
-                            <button
-                                onClick={handleRevertToDefault(score, "sound")}
-                            >
-                                Revert to default for score {score}?
-                            </button>
-                        )}
-                        {!fileUploads[score]?.sound?.removed ? (
-                            <button onClick={handleRemove(score, "sound")}>
-                                Remove all sounds for score {score}?
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleRevertToDefault(score, "sound")}
-                            >
-                                Add default sound back for score {score}?
-                            </button>
-                        )}
-                        <div
-                            style={{
-                                color: "black",
-                                fontSize: "12px",
-                                marginTop: "5px",
-                            }}
-                        >
-                            {fileUploads[score]?.sound?.fileName &&
-                                !fileUploads[score]?.sound?.removed && (
-                                    <span>
-                                        Sound uploaded for score {score}:{" "}
-                                        {fileUploads[score].sound.fileName}
-                                    </span>
-                                )}
-                            {!fileUploads[score]?.sound?.fileName &&
-                                !fileUploads[score]?.sound?.removed && (
-                                    <span>
-                                        No sound uploaded for score {score},
-                                        resort to default
-                                    </span>
-                                )}
-                        </div>
-                    </div>
+                    <ScoreCard
+                        score={score}
+                        fileUploads={fileUploads}
+                        inputType="sound"
+                        onUpload={handleFileUpload(score, "sound")}
+                        onRevert={handleRevertToDefault(score, "sound")}
+                        onRemove={handleRemove(score, "sound")}
+                    />
                 ))}
 
                 <h3>Custom Animations</h3>
                 {scores.map((score) => (
-                    <div key={score} style={{ marginBottom: "10px" }}>
-                        <FileUpload
-                            onChange={handleFileUpload(score, "animation")}
-                            score={score}
-                            inputType="animation"
-                        />
-                        {fileUploads[score]?.anim?.fileName && (
-                            <button
-                                onClick={handleRevertToDefault(
-                                    score,
-                                    "animation"
-                                )}
-                            >
-                                Revert to default for score {score}?
-                            </button>
-                        )}
-                        {!fileUploads[score]?.anim?.removed ? (
-                            <button onClick={handleRemove(score, "animation")}>
-                                Remove all animations for score {score}?
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleRevertToDefault(
-                                    score,
-                                    "animation"
-                                )}
-                            >
-                                Add default animation back for score {score}?
-                            </button>
-                        )}
-                        <div
-                            style={{
-                                color: "black",
-                                fontSize: "12px",
-                                marginTop: "5px",
-                            }}
-                        >
-                            {fileUploads[score]?.anim?.fileName &&
-                                !fileUploads[score]?.anim?.removed && (
-                                    <span>
-                                        Animation uploaded for score {score}:{" "}
-                                        {fileUploads[score].anim.fileName}
-                                    </span>
-                                )}
-                            {!fileUploads[score]?.anim?.fileName &&
-                                !fileUploads[score]?.anim?.removed && (
-                                    <span>
-                                        No animation uploaded for score {score},
-                                        resort to default
-                                    </span>
-                                )}
-                        </div>
-                    </div>
+                    <ScoreCard
+                        score={score}
+                        fileUploads={fileUploads}
+                        inputType="animation"
+                        onUpload={handleFileUpload(score, "animation")}
+                        onRevert={handleRevertToDefault(score, "animation")}
+                        onRemove={handleRemove(score, "animation")}
+                    />
                 ))}
                 <button onClick={resetAll}>
                     Reset All (Animations And Sounds) to default?
