@@ -16,10 +16,7 @@ chrome.runtime.onMessage.addListener(async function(request, _sender, sendRespon
     }
 });
 
-
-// fixme: it also hides the body of the award but doesn't hide the header so it's really funny lmao
-// fixme: clicking on it again makes it do the animation n stuff again
-
+const clickedCards = new Set<HTMLElement>();
 function hideScores() {
     // hide the class: class="apscores-card-body  display-flex"
     function resetCards() {
@@ -28,20 +25,34 @@ function hideScores() {
             for (const card of scoreCards) {
                 const scoreCard = card as HTMLElement;
 
+                if (isAwardCard(scoreCard)) {
+                    scoreCard.classList.add('is-award');
+                    scoreCard.style.opacity = '1';
+                    continue;
+                }
+
+                if (clickedCards.has(scoreCard)) {
+                    continue;
+                }
+                clickedCards.add(scoreCard);
+
                 // make each card clickable: once clicked, css style shows it
                 scoreCard.addEventListener("click", () => {
-                    scoreCard.style.opacity = '1';
-                    scoreCard.style.pointerEvents = 'auto';
-                    // re-enable clicking on children
-                    const children = scoreCard.querySelectorAll('*');
-                    children.forEach(child => {
-                        (child as HTMLElement).style.pointerEvents = 'auto';
-                    });
+                    const computedOpacity = window.getComputedStyle(scoreCard).opacity;
+                    if (computedOpacity == '0') {
+                        scoreCard.style.opacity = '1';
+                        scoreCard.style.pointerEvents = 'auto';
+                        // re-enable clicking on children
+                        const children = scoreCard.querySelectorAll('*');
+                        children.forEach(child => {
+                            (child as HTMLElement).style.pointerEvents = 'auto';
+                        });
 
-                    const score = getScore(scoreCard);
-                    // play a sound effect depending on the score
-                    playSound(score);
-                    playAnimation(score)
+                        const score = getScore(scoreCard);
+                        // play a sound effect depending on the score
+                        playSound(score);
+                        playAnimation(score);
+                    }
                 });
             }
         }
@@ -62,6 +73,19 @@ function getScore(scoreCard:HTMLElement) {
     }
     console.log(score);
     return score;
+}
+
+function isAwardCard(scoreCard: HTMLElement): boolean {
+    let parent = scoreCard.parentElement;
+    while (parent && parent !== document.body) {
+        const testId = parent.getAttribute('data-testid');
+        if (testId && testId.includes('award')) {
+            console.log("is an award");
+            return true;
+        }
+        parent = parent.parentElement;
+    }
+    return false;
 }
 
 function base64ToArrayBuffer(base64: string): ArrayBuffer {
