@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Exam Score Cover",
     "version": "1.0",
-    "description": "Covers up College Board AP exam scores.",
+    "description": "Make AP score release day fun with customizable sounds and animations.",
     "permissions": ["tabs", "scripting", "activeTab", "storage"],
     "background": {
         "service_worker": "background.js",

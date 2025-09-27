@@ -1,5 +1,6 @@
 import React from "react";
 import FileUpload from "./FileUpload";
+import ScoreLabel from "./ScoreLabel";
 
 interface Props {
     score: number;
@@ -44,8 +45,10 @@ function ScoreCard({
                 margin: "15px",
                 border: "5px solid black",
                 borderRadius: "10px",
+                padding: "15px",
             }}
         >
+            <ScoreLabel score={score} />
             <FileUpload
                 onChange={onUpload}
                 score={score}

@@ -1,6 +1,7 @@
 import Header from "./components/Header.tsx";
 import ScoreCard from "./components/ScoreCard.tsx";
 import { useState, useEffect } from "react";
+import TabNavButton from "./components/TabNavButton.tsx";
 
 function App() {
     // initialize with the state in chrome.storage. if nothing in chrome.storage, then null
@@ -35,6 +36,12 @@ function App() {
             }
         });
     }, []);
+
+    const [activeTab, setActiveTab] = useState("sound");
+
+    const switchActiveTab = () => {
+        setActiveTab(activeTab === "sound" ? "animation" : "sound");
+    };
 
     const handleFileUpload =
         (score: number, inputType: string) =>
@@ -215,30 +222,61 @@ function App() {
     return (
         <>
             <Header />
-            <div style={{ padding: "10px" }}>
-                <h3>Custom Sounds</h3>
-                {scores.map((score) => (
-                    <ScoreCard
-                        score={score}
-                        fileUploads={fileUploads}
-                        inputType="sound"
-                        onUpload={handleFileUpload(score, "sound")}
-                        onRevert={handleRevertToDefault(score, "sound")}
-                        onRemove={handleRemove(score, "sound")}
-                    />
-                ))}
 
-                <h3>Custom Animations</h3>
-                {scores.map((score) => (
-                    <ScoreCard
-                        score={score}
-                        fileUploads={fileUploads}
-                        inputType="animation"
-                        onUpload={handleFileUpload(score, "animation")}
-                        onRevert={handleRevertToDefault(score, "animation")}
-                        onRemove={handleRemove(score, "animation")}
-                    />
-                ))}
+            <div
+                style={{
+                    display: "flex",
+                    borderBottom: "2px solid blue",
+                    marginBottom: "15px",
+                }}
+            >
+                <TabNavButton
+                    inputType="sound"
+                    activeTab={activeTab}
+                    onSwitch={switchActiveTab}
+                />
+                <TabNavButton
+                    inputType="animation"
+                    activeTab={activeTab}
+                    onSwitch={switchActiveTab}
+                />
+            </div>
+
+            <div style={{ padding: "10px" }}>
+                {activeTab === "sound" && (
+                    <>
+                        <h3>Custom Sounds</h3>
+                        {scores.map((score) => (
+                            <ScoreCard
+                                score={score}
+                                fileUploads={fileUploads}
+                                inputType="sound"
+                                onUpload={handleFileUpload(score, "sound")}
+                                onRevert={handleRevertToDefault(score, "sound")}
+                                onRemove={handleRemove(score, "sound")}
+                            />
+                        ))}
+                    </>
+                )}
+                {activeTab === "animation" && (
+                    <>
+                        <h3>Custom Animations</h3>
+                        {scores.map((score) => (
+                            <ScoreCard
+                                score={score}
+                                fileUploads={fileUploads}
+                                inputType="animation"
+                                onUpload={handleFileUpload(score, "animation")}
+                                onRevert={handleRevertToDefault(
+                                    score,
+                                    "animation"
+                                )}
+                                onRemove={handleRemove(score, "animation")}
+                            />
+                        ))}
+                    </>
+                )}
+
                 <button onClick={resetAll}>
                     Reset All (Animations And Sounds) to default?
                 </button>
