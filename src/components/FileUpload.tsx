@@ -1,12 +1,18 @@
-import React from "react";
+import { useRef } from "react";
 
 interface Props {
     onChange: React.ChangeEventHandler<HTMLInputElement>;
+    buttonStyle: React.CSSProperties;
     inputType: string;
 }
 
-// todo: make prettier
-function FileUpload({ onChange, inputType }: Props) {
+function FileUpload({ onChange, buttonStyle, inputType }: Props) {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleClick = () => {
+        inputRef.current?.click();
+    };
+
     let acceptTypes: string;
     if (inputType === "sound") {
         acceptTypes = ".mp3,.wav,.ogg";
@@ -14,31 +20,30 @@ function FileUpload({ onChange, inputType }: Props) {
         acceptTypes = ".gif";
     }
 
-    const buttonStyle = {
-        padding: "8px 12px",
-        border: "1px solid",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontSize: "12px",
-        fontWeight: "500",
-        transition: "all 0.2 ease",
+    const uploadButtonStyle = {
+        ...buttonStyle,
         background: "blue",
         borderColor: "blue",
         color: "white",
-        display: "inline-block",
-    };
+        whiteSpace: "nowrap" as const,
+        textAlign: "center" as const,
+        verticalAlign: "middle",
+        minHeight: "0",
+        height: "auto",
+    } as React.CSSProperties;
 
     return (
         <>
-            <label style={buttonStyle}>
+            <div onClick={handleClick} style={uploadButtonStyle}>
                 Upload {inputType}
-                <input
-                    type="file"
-                    accept={acceptTypes}
-                    style={{ display: "none" }}
-                    onChange={onChange}
-                />
-            </label>
+            </div>
+            <input
+                ref={inputRef}
+                type="file"
+                accept={acceptTypes}
+                style={{ display: "none" }}
+                onChange={onChange}
+            />
         </>
     );
 }

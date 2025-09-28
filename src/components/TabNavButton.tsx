@@ -1,4 +1,5 @@
 import React from "react";
+import { colors } from "../styles/colors.ts";
 
 interface Props {
     inputType: string;
@@ -14,16 +15,28 @@ function TabNavButton({ inputType, activeTab, onSwitch }: Props) {
             onClick={onSwitch}
             style={{
                 flex: 1,
-                padding: "12px 8px",
+                padding: "12px 16px",
                 border: "none",
-                background: isActive ? "#007bff" : "#f8f9fa",
-                color: isActive ? "white" : "#666",
+                background: isActive ? colors.primary : colors.background,
+                color: isActive ? "white" : colors.textSecondary,
                 fontSize: "14px",
-                fontWeight: "500",
-                borderBottom: isActive ? "4px solid blue" : "transparent",
+                fontWeight: isActive ? "600" : "500",
                 cursor: "pointer",
-                transition: "all 0.2s",
-                borderRadius: "6px 6px 0 0",
+                transition: "all 0.2s ease",
+                borderRadius: "8px 8px 0 0",
+                borderBottom: isActive
+                    ? `3px solid ${colors.primary}`
+                    : "3px solid transparent",
+            }}
+            onMouseEnter={(e) => {
+                if (!isActive) {
+                    e.currentTarget.style.background = colors.border;
+                }
+            }}
+            onMouseLeave={(e) => {
+                if (!isActive) {
+                    e.currentTarget.style.background = colors.background;
+                }
             }}
         >
             {inputType === "sound" ? "Sounds" : "Animations"}

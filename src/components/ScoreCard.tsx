@@ -1,6 +1,7 @@
 import FileUpload from "./FileUpload";
 import ScoreLabel from "./ScoreLabel";
 import ToggleSwitch from "./ToggleSwitch";
+import { colors } from "../styles/colors.ts";
 
 interface Props {
     score: number;
@@ -20,6 +21,7 @@ interface Props {
         } | null
     >;
     inputType: string;
+    buttonStyle: React.CSSProperties;
     onUpload: React.ChangeEventHandler<HTMLInputElement>;
     onRevert: React.MouseEventHandler<HTMLButtonElement>;
     onRemove: React.MouseEventHandler<HTMLButtonElement>;
@@ -29,6 +31,7 @@ function ScoreCard({
     score,
     fileUploads,
     inputType,
+    buttonStyle,
     onUpload,
     onRevert,
     onRemove,
@@ -37,19 +40,6 @@ function ScoreCard({
         inputType === "sound"
             ? fileUploads[score]?.sound
             : fileUploads[score]?.anim;
-
-    const buttonStyle = {
-        padding: "8px 12px",
-        border: "1px solid",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontSize: "12px",
-        fontWeight: "500",
-        transition: "all 0.2s ease",
-        background: "#6c757d",
-        borderColor: "#6c757d",
-        color: "white",
-    };
 
     const handleRemoveToggle = () => {
         if (scoreInputValues?.removed) {
@@ -63,17 +53,34 @@ function ScoreCard({
         }
     };
 
+    const revertButtonStyle = {
+        ...buttonStyle,
+        background: colors.warning,
+        borderColor: colors.warning,
+        color: "white",
+    };
+
+    const uploadButtonStyle = {
+        ...buttonStyle,
+        background: colors.primary,
+        borderColor: colors.primary,
+        color: "white",
+        verticalAlign: "middle",
+        lineHeight: "1",
+    };
+
     return (
         <div
             style={{
-                padding: "12px",
-                border: "2px solid #e0e0e0",
-                borderRadius: "10px",
-                marginBottom: "12px",
+                padding: "16px",
+                border: `1px solid ${colors.border}`,
+                borderRadius: "12px",
+                marginBottom: "8px",
                 boxSizing: "border-box",
                 display: "flex",
                 alignItems: "center",
-                gap: "16px",
+                gap: "12px",
+                background: colors.cardBackground,
             }}
         >
             <div
@@ -82,7 +89,6 @@ function ScoreCard({
                     flexDirection: "column",
                     color: "black",
                     fontSize: "12px",
-                    marginTop: "5px",
                     display: "flex",
                     alignItems: "center",
                     maxWidth: "120px",
@@ -98,16 +104,19 @@ function ScoreCard({
                             display: "-webkit-box",
                             WebkitLineClamp: 2, // truncate if too long
                             WebkitBoxOrient: "vertical",
+                            marginTop: "8px",
                         }}
                     >
                         Uploaded: {scoreInputValues.fileName}
                     </span>
                 )}
                 {!scoreInputValues?.fileName && !scoreInputValues?.removed && (
-                    <span>Using default</span>
+                    <span style={{ marginTop: "8px" }}>Using default</span>
                 )}
                 {scoreInputValues?.removed && (
-                    <span>No {inputType} effect</span>
+                    <span style={{ marginTop: "8px" }}>
+                        No {inputType} effect
+                    </span>
                 )}
             </div>
 
@@ -116,20 +125,27 @@ function ScoreCard({
                     flex: 1,
                     display: "flex",
                     gap: "8px",
+                    alignItems: "center",
                 }}
             >
-                <FileUpload onChange={onUpload} inputType={inputType} />
+                <FileUpload
+                    onChange={onUpload}
+                    buttonStyle={uploadButtonStyle}
+                    inputType={inputType}
+                />
                 {scoreInputValues?.fileName && (
-                    <button onClick={onRevert} style={buttonStyle}>
-                        Revert to Default
+                    <button onClick={onRevert} style={revertButtonStyle}>
+                        Reset
                     </button>
                 )}
 
-                <ToggleSwitch
-                    inputType={inputType}
-                    onToggle={handleRemoveToggle}
-                    isChecked={!scoreInputValues?.removed}
-                ></ToggleSwitch>
+                <div style={{ marginLeft: "auto" }}>
+                    <ToggleSwitch
+                        inputType={inputType}
+                        onToggle={handleRemoveToggle}
+                        isChecked={!scoreInputValues?.removed}
+                    ></ToggleSwitch>
+                </div>
             </div>
         </div>
     );

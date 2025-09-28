@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header.tsx";
 import ScoreCard from "./components/ScoreCard.tsx";
 import TabNavButton from "./components/TabNavButton.tsx";
-// import ToggleSwitch from "./components/ToggleSwitch.tsx";
+import { colors } from "./styles/colors.ts";
 
 function App() {
     // initialize with the state in chrome.storage. if nothing in chrome.storage, then null
@@ -41,6 +41,33 @@ function App() {
     const [activeTab, setActiveTab] = useState("sound");
     const switchActiveTab = (inputType: string) => {
         setActiveTab(inputType === "sound" ? "sound" : "animation");
+    };
+
+    const buttonStyle = {
+        padding: "8px 12px",
+        border: "1px solid",
+        borderRadius: "8px",
+        cursor: "pointer",
+        fontSize: "12px",
+        fontWeight: "500",
+        transition: "all 0.2s ease",
+        background: colors.secondary,
+        borderColor: colors.secondary,
+        color: "white",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        lineHeight: "1.2",
+        boxSizing: "border-box",
+    } as React.CSSProperties;
+
+    const resetButtonStyle = {
+        ...buttonStyle,
+        background: colors.danger,
+        borderColor: colors.danger,
+        color: "white",
+        display: "block",
+        margin: "20px auto",
     };
 
     const handleFileUpload =
@@ -170,19 +197,44 @@ function App() {
         }
     };
 
-    // todo: change this to just reset animations or just reset sounds
     const resetAll = async (): Promise<void> => {
         try {
-            await chrome.storage.local.remove(["fileUploads"]);
-            setFileUpload({
-                1: null,
-                2: null,
-                3: null,
-                4: null,
-                5: null,
+            const newState = { ...fileUploads };
+
+            scores.forEach((score) => {
+                const existingData = fileUploads[score];
+
+                if (activeTab === "sound") {
+                    newState[score] = {
+                        sound: {
+                            fileName: "",
+                            base64: "",
+                            removed: false,
+                        },
+                        anim: existingData?.anim || {
+                            fileName: "",
+                            base64: "",
+                            removed: false,
+                        },
+                    };
+                } else {
+                    newState[score] = {
+                        sound: existingData?.sound || {
+                            fileName: "",
+                            base64: "",
+                            removed: false,
+                        },
+                        anim: {
+                            fileName: "",
+                            base64: "",
+                            removed: false,
+                        },
+                    };
+                }
             });
 
-            console.log("reset");
+            setFileUpload(newState);
+            await chrome.storage.local.set({ fileUploads: newState });
         } catch (error) {
             console.error(error, "with resetting");
         }
@@ -223,10 +275,13 @@ function App() {
     return (
         <div
             style={{
-                width: "500px",
+                width: "450px",
                 maxHeight: "600px",
                 overflow: "auto",
                 boxSizing: "border-box",
+                background: colors.background,
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
             }}
         >
             <Header />
@@ -259,13 +314,15 @@ function App() {
                         score={score}
                         fileUploads={fileUploads}
                         inputType={activeTab}
+                        buttonStyle={buttonStyle}
                         onUpload={handleFileUpload(score, activeTab)}
                         onRevert={handleRevertToDefault(score, activeTab)}
                         onRemove={handleRemove(score, activeTab)}
                     />
                 ))}
-                <button onClick={resetAll}>
-                    Reset All (Animations And Sounds) to default?
+                <button onClick={resetAll} style={resetButtonStyle}>
+                    Reset All{" "}
+                    {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}s
                 </button>
             </div>
         </div>

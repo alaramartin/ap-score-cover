@@ -1,10 +1,11 @@
+import { colors } from "../styles/colors.ts";
+
 function Header() {
     return (
         <header
             style={{
                 padding: "16px",
-                borderBottom: "1px solid #e9ecef",
-                background: "#f8f9fa",
+                background: colors.background,
             }}
         >
             <h1

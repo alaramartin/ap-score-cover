@@ -1,24 +1,27 @@
+import { colors } from "../styles/colors.ts";
+
 interface Props {
     score: number;
 }
 
 function ScoreLabel({ score }: Props) {
+    const getScoreColor = (score: number) => {
+        if (score === 5) return colors.score5;
+        if (score >= 3) return colors.score34;
+        return colors.score12;
+    };
+
     return (
         <div
             style={{
-                backgroundColor:
-                    score === 5
-                        ? "#88E788"
-                        : score >= 3
-                        ? "#90D5FF"
-                        : "#FF474C",
+                backgroundColor: getScoreColor(score),
                 borderRadius: "50%",
-                width: "25px",
-                height: "25px",
+                width: "28px",
+                height: "28px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "black",
+                color: "white",
                 fontFamily: "sans-serif",
                 fontSize: "12px",
                 fontWeight: "bold",
