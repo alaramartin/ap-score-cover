@@ -21,7 +21,7 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 600px;
+  min-width: 500px;
   min-height: 100vh;
 }
 
@@ -46,8 +46,5 @@ h1 {
   }
   a:hover {
     color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }

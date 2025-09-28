@@ -2,29 +2,36 @@ import React from "react";
 
 interface Props {
     onChange: React.ChangeEventHandler<HTMLInputElement>;
-    score: number;
-    inputType: "sound" | "animation";
+    inputType: string;
 }
 
 // todo: make prettier
-function FileUpload({ onChange, score, inputType }: Props) {
+function FileUpload({ onChange, inputType }: Props) {
     let acceptTypes: string;
     if (inputType === "sound") {
         acceptTypes = ".mp3,.wav,.ogg";
     } else {
         acceptTypes = ".gif";
     }
+
+    const buttonStyle = {
+        padding: "8px 12px",
+        border: "1px solid",
+        borderRadius: "6px",
+        cursor: "pointer",
+        fontSize: "12px",
+        fontWeight: "500",
+        transition: "all 0.2 ease",
+        background: "blue",
+        borderColor: "blue",
+        color: "white",
+        display: "inline-block",
+    };
+
     return (
         <>
-            <label
-                style={{
-                    border: "1px solid #000",
-                    padding: "8px",
-                    display: "inline-block",
-                    cursor: "pointer",
-                }}
-            >
-                Upload {inputType} for score {score}
+            <label style={buttonStyle}>
+                Upload {inputType}
                 <input
                     type="file"
                     accept={acceptTypes}

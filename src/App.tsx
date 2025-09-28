@@ -1,7 +1,8 @@
+import { useState, useEffect } from "react";
 import Header from "./components/Header.tsx";
 import ScoreCard from "./components/ScoreCard.tsx";
-import { useState, useEffect } from "react";
 import TabNavButton from "./components/TabNavButton.tsx";
+// import ToggleSwitch from "./components/ToggleSwitch.tsx";
 
 function App() {
     // initialize with the state in chrome.storage. if nothing in chrome.storage, then null
@@ -38,9 +39,8 @@ function App() {
     }, []);
 
     const [activeTab, setActiveTab] = useState("sound");
-
-    const switchActiveTab = () => {
-        setActiveTab(activeTab === "sound" ? "animation" : "sound");
+    const switchActiveTab = (inputType: string) => {
+        setActiveTab(inputType === "sound" ? "sound" : "animation");
     };
 
     const handleFileUpload =
@@ -170,6 +170,7 @@ function App() {
         }
     };
 
+    // todo: change this to just reset animations or just reset sounds
     const resetAll = async (): Promise<void> => {
         try {
             await chrome.storage.local.remove(["fileUploads"]);
@@ -220,68 +221,54 @@ function App() {
     const scores = [5, 4, 3, 2, 1];
 
     return (
-        <>
+        <div
+            style={{
+                width: "500px",
+                maxHeight: "600px",
+                overflow: "auto",
+                boxSizing: "border-box",
+            }}
+        >
             <Header />
 
             <div
                 style={{
                     display: "flex",
+                    gap: "2px",
                     borderBottom: "2px solid blue",
                     marginBottom: "15px",
+                    background: "#f8f9fa",
                 }}
             >
                 <TabNavButton
                     inputType="sound"
                     activeTab={activeTab}
-                    onSwitch={switchActiveTab}
+                    onSwitch={() => switchActiveTab("sound")}
                 />
                 <TabNavButton
                     inputType="animation"
                     activeTab={activeTab}
-                    onSwitch={switchActiveTab}
+                    onSwitch={() => switchActiveTab("animation")}
                 />
             </div>
 
             <div style={{ padding: "10px" }}>
-                {activeTab === "sound" && (
-                    <>
-                        <h3>Custom Sounds</h3>
-                        {scores.map((score) => (
-                            <ScoreCard
-                                score={score}
-                                fileUploads={fileUploads}
-                                inputType="sound"
-                                onUpload={handleFileUpload(score, "sound")}
-                                onRevert={handleRevertToDefault(score, "sound")}
-                                onRemove={handleRemove(score, "sound")}
-                            />
-                        ))}
-                    </>
-                )}
-                {activeTab === "animation" && (
-                    <>
-                        <h3>Custom Animations</h3>
-                        {scores.map((score) => (
-                            <ScoreCard
-                                score={score}
-                                fileUploads={fileUploads}
-                                inputType="animation"
-                                onUpload={handleFileUpload(score, "animation")}
-                                onRevert={handleRevertToDefault(
-                                    score,
-                                    "animation"
-                                )}
-                                onRemove={handleRemove(score, "animation")}
-                            />
-                        ))}
-                    </>
-                )}
-
+                {scores.map((score) => (
+                    <ScoreCard
+                        key={score + activeTab}
+                        score={score}
+                        fileUploads={fileUploads}
+                        inputType={activeTab}
+                        onUpload={handleFileUpload(score, activeTab)}
+                        onRevert={handleRevertToDefault(score, activeTab)}
+                        onRemove={handleRemove(score, activeTab)}
+                    />
+                ))}
                 <button onClick={resetAll}>
                     Reset All (Animations And Sounds) to default?
                 </button>
             </div>
-        </>
+        </div>
     );
 }
 

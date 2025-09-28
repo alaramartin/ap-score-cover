@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Exam Score Cover",
+    "name": "AP Exam Score Cover",
     "version": "1.0",
     "description": "Make AP score release day fun with customizable sounds and animations.",
     "permissions": ["tabs", "scripting", "activeTab", "storage"],
