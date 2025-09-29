@@ -1,22 +1,31 @@
-# AP Exam Score Blocker Chrome Extension
+# AP Exam Score Reveal Chrome Extension
 
 [![Athena Award Badge](https://img.shields.io/endpoint?url=https%3A%2F%2Faward.athena.hackclub.com%2Fapi%2Fbadge)](https://award.athena.hackclub.com?utm_source=readme)
 
-Make AP score release day fun! This extension hides AP exam scores until you click on each one and lets you customize sounds and animations that play once revealed.
+Make AP score release day fun! This extension hides AP exam scores until you click on each one and lets you customize animations and sounds that play once revealed.
 
 ## Features
 
--   Hide scores until clicked on
--   Play a sound and animation depending on the score
-    -   Defaults available, but also customizable!
+-   Scores hidden by default, click to view!
+-   Play an animation and sound depending on the score
+-   Fully customizable
+    -   Defaults available
 
 ## Example
 
-(insert video here)
+![example_video](https://raw.githubusercontent.com/alaramartin/ap-score-cover/refs/heads/main/example.mp4)
 
 ## Installation
 
-Download this extension from the [Chrome Web Store](link_to_be_added)!
+This extension is currently under review for the Chrome Web Store. Until it is published, here's how you can use it:
+
+Clone this repo to your local computer using `git clone https://github.com/alaramartin/ap-score-cover.git` and navigate to the project folder.
+
+Make sure you have Node.js installed and run `npm install` to install dependencies. Then, run `npm run build` to build the extension and you'll see a folder titled `dist` in the root directory of the project folder.
+
+Open Chrome and go to [chrome://extensions/](chrome://extensions/), enable Developer Mode, and click "Load Unpacked." Select the `dist` folder of the project. You'll see the extension show up in the Chrome toolbar.
+
+From there, customize animations and sounds through the extension popup and test with your AP scores on the [College Board AP Website](https://apstudents.collegeboard.org/view-scores)!
 
 ## Contributing
 
