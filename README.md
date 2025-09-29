@@ -13,7 +13,9 @@ Make AP score release day fun! This extension hides AP exam scores until you cli
 
 ## Example
 
-![example_video](https://raw.githubusercontent.com/alaramartin/ap-score-cover/refs/heads/main/example.mp4)
+![Example Popup](https://raw.githubusercontent.com/alaramartin/ap-score-cover/refs/heads/main/examples/example_audio.png)  
+![Example Upload](https://raw.githubusercontent.com/alaramartin/ap-score-cover/refs/heads/main/examples/example_uploaded.png)  
+![Example Video](https://github.com/alaramartin/ap-score-cover/blob/main/examples/example.mp4) (you may have to download the .mp4 to view)
 
 ## Installation
 
